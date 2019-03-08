@@ -1,0 +1,22 @@
+heat_template_version: '2018-08-31'
+description: network switcher for existing network
+
+parameters:
+  private_network:
+    type: string
+    default: ""
+  private_subnet:
+    type: string
+    default: ""
+  existing_network:
+    type: string
+    default: ""
+  existing_subnet:
+    type: string
+    default: ""
+
+outputs:
+  private_network:
+    value: { get_param: private_network }
+  private_subnet:
+    value: { get_param: private_subnet }

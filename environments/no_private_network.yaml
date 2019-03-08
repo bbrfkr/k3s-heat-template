@@ -1,0 +1,7 @@
+resource_registry:
+  "K3s::NetworkSwitcher": no_private_networkswitcher.yaml
+
+  "K3s::Optional::Neutron::Subnet": "OS::Heat::None"
+  "K3s::Optional::Neutron::Net": "OS::Heat::None"
+  "K3s::Optional::Neutron::Router": "OS::Heat::None"
+  "K3s::Optional::Neutron::RouterInterface": "OS::Heat::None"

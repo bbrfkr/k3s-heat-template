@@ -1,0 +1,110 @@
+heat_template_version: '2018-08-31'
+description: provision k3s worker
+
+parameters:
+  name:
+    type: string
+  worker_keypair:
+    type: string
+  worker_external_network:
+    type: string
+  worker_private_network:
+    type: string
+  worker_private_subnet:
+    type: string
+  worker_image:
+    type: string
+  worker_flavor:
+    type: string
+  pods_network_cidr:
+    type: string
+  k3s_binary_url:
+    type: string
+  node_token_share_user:
+    type: string
+  node_token_share_secret:
+    type: string
+  master_private_ip:
+    type: string
+  master_public_ip:
+    type: string
+
+resources:
+  k3s_worker:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: name }
+      image: { get_param: worker_image }
+      flavor: { get_param: worker_flavor }
+      key_name: { get_param: worker_keypair }
+      user_data_format: SOFTWARE_CONFIG
+      software_config_transport: POLL_SERVER_HEAT
+      user_data: {get_resource: k3s_worker_init}
+      networks:
+      - port: { get_resource: k3s_worker_eth0 }
+
+  k3s_worker_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: worker_private_network }
+      fixed_ips:
+      - subnet: { get_param: worker_private_subnet }
+      allowed_address_pairs:
+      - ip_address: { get_param: pods_network_cidr }
+      replacement_policy: AUTO
+
+  k3s_worker_floatingip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: worker_external_network }
+      port_id: { get_resource: k3s_worker_eth0 }
+
+  k3s_worker_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: write_heat_params_worker}
+        - config: {get_resource: download_k3s_binary}
+        - config: {get_resource: configure_rsync_worker}
+        - config: {get_resource: configure_k3s_worker}
+
+  disable_selinux:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: disable_selinux.sh }
+
+  write_heat_params_worker:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            "${K3S_BINARY_URL}": { get_param: k3s_binary_url }
+            "${K3S_MASTER_PRIVATE_IP}": { get_param: master_private_ip }
+            "${K3S_MASTER_PUBLIC_IP}": { get_param: master_public_ip }
+            "${NODE_TOKEN_SHARE_USER}": { get_param: node_token_share_user }
+            "${NODE_TOKEN_SHARE_SECRET}": { get_param: node_token_share_secret }
+          template: { get_file: write_heat_params_worker.sh }
+
+  download_k3s_binary:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: download_k3s_binary.sh }
+
+  configure_rsync_worker:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: configure_rsync_worker.sh }
+
+  configure_k3s_worker:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: configure_k3s_worker.sh }
+
+outputs:

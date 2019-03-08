@@ -1,0 +1,42 @@
+parameters:
+  # number of k3s nodes
+  worker_count:
+
+  # keypair for instances belongs to k3s cluster
+  keypair: <keypair name>
+
+  # external network name to get floating ip
+  external_network: <external network name>
+
+  # private network id for k3s cluster
+  private_network:
+
+  # private subnet id for k3s cluster
+  private_subnet:
+
+  # private subnet cidr for k3s cluster
+  private_subnet_cidr:
+
+  # image name for k3s server
+  master_image: <master image name>
+
+  # flavor name for k3s server
+  master_flavor: <master flavor name>
+
+  # image name for k3s nodes
+  worker_image: <worker image name>
+
+  # flavor name for k3s nodes
+  worker_flavor: <worker flavor name>
+
+  # network cidr for pods network
+  pods_network_cidr:
+
+  # url to download k3s binary
+  k3s_binary_url:
+
+  # username of rsync user to share node token
+  node_token_share_user:
+
+  # password of rsync user to share node token
+  node_token_share_secret:

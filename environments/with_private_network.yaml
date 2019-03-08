@@ -1,0 +1,7 @@
+resource_registry:
+  "K3s::NetworkSwitcher": with_private_networkswitcher.yaml
+
+  "K3s::Optional::Neutron::Subnet": "OS::Neutron::Subnet"
+  "K3s::Optional::Neutron::Net": "OS::Neutron::Net"
+  "K3s::Optional::Neutron::Router": "OS::Neutron::Router"
+  "K3s::Optional::Neutron::RouterInterface": "OS::Neutron::RouterInterface"

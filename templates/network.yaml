@@ -1,0 +1,55 @@
+heat_template_version: '2018-08-31'
+description: provision networks for k3s cluster
+
+parameters:
+  external_network:
+    type: string
+    default: ""
+  existing_network:
+    type: string
+    default: ""
+  private_network_name: 
+    type: string
+    default: ""
+  existing_subnet:
+    type: string
+    default: ""
+  private_subnet_cidr:
+    type: string
+    default: ""
+
+resources:
+  private_network:
+    type: K3s::Optional::Neutron::Net
+    properties:
+      name: { get_param: private_network_name }
+  private_subnet:
+    type: K3s::Optional::Neutron::Subnet
+    properties:
+      cidr: { get_param: private_subnet_cidr }
+      network: { get_resource: private_network }
+  router:
+    type: K3s::Optional::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_network }
+  routerinterface:
+    type: K3s::Optional::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet: { get_resource: private_subnet }
+  private_networkswitcher:
+    type: K3s::NetworkSwitcher
+    properties:
+      private_network: { get_resource: private_network }
+      private_subnet: { get_resource: private_subnet }
+      existing_network: { get_param: existing_network }
+      existing_subnet: { get_param: existing_subnet }
+
+outputs:
+  private_network:
+    description: network id where to provision instances
+    value: { get_attr: [private_networkswitcher, private_network] }
+  private_subnet:
+    description: subnet id where to provision instances
+    value: { get_attr: [private_networkswitcher, private_subnet] }

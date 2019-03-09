@@ -30,6 +30,21 @@ parameters:
     type: string
 
 resources:
+  secgrp_k3s_worker:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+        - protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+
   k3s_worker:
     type: OS::Nova::Server
     properties:
@@ -51,6 +66,8 @@ resources:
       - subnet: { get_param: worker_private_subnet }
       allowed_address_pairs:
       - ip_address: { get_param: pods_network_cidr }
+      security_groups:
+      - { get_resource: secgrp_k3s_worker }
       replacement_policy: AUTO
 
   k3s_worker_floatingip:

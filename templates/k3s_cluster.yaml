@@ -40,6 +40,10 @@ parameters:
     type: string
     description: network cidr for pods network
     default: "10.42.0.0/16"
+  disable_master_agent:
+    type: boolean
+    description: disable agent on master node 
+    default: no
   k3s_binary_url:
     type: string
     description: url to download k3s binary
@@ -85,6 +89,7 @@ resources:
           master_image: { get_param: master_image }
           master_flavor: { get_param: master_flavor }
           pods_network_cidr: { get_param: pods_network_cidr }
+          disable_master_agent: { get_param: disable_master_agent }
           k3s_binary_url: { get_param: k3s_binary_url }
           node_token_share_user: { get_param: node_token_share_user }
           node_token_share_secret: { get_param: node_token_share_secret }
@@ -124,13 +129,26 @@ outputs:
     description: command to download admin kubeconfig of k3s cluster
     value:
       list_join:
-      - ' '
-      - - 'scp'
+      - ' && '
+      - - list_join:
+          - ' '
+          - - 'scp'
+            - list_join:
+              - ':'
+              - - list_join:
+                  - '@'
+                  - - 'centos'
+                    - { get_attr: [masters, resource.0.master_public_ip] }
+                - '/etc/rancher/k3s/k3s.yaml'
+            - '~'
         - list_join:
-          - ':'
-          - - list_join:
-              - '@'
-              - - 'centos'
+          - ' '
+          - - 'sed'
+            - '-i'
+            - list_join:
+              - '/'
+              - - "'s"
+                - 'localhost'
                 - { get_attr: [masters, resource.0.master_public_ip] }
-            - '/etc/rancher/k3s/k3s.yaml'
-        - '~'
+                - "g'"
+            - '~/k3s.yaml'

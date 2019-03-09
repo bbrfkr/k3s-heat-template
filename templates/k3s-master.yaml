@@ -18,6 +18,8 @@ parameters:
     type: string
   pods_network_cidr:
     type: string
+  disable_master_agent:
+    type: boolean
   k3s_binary_url:
     type: string
   node_token_share_user:
@@ -26,6 +28,27 @@ parameters:
     type: string
 
 resources:
+  secgrp_k3s_master:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 873
+          port_range_max: 873
+        - protocol: tcp
+          port_range_min: 6443
+          port_range_max: 6443
+        - protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+        - protocol: udp
+          port_range_min: 4789
+          port_range_max: 4789
+
   k3s_master:
     type: OS::Nova::Server
     properties:
@@ -47,6 +70,8 @@ resources:
       - subnet: { get_param: master_private_subnet }
       allowed_address_pairs:
       - ip_address: { get_param: pods_network_cidr }
+      security_groups:
+      - { get_resource: secgrp_k3s_master }
       replacement_policy: AUTO
 
   k3s_master_floatingip:
@@ -64,6 +89,7 @@ resources:
         - config: {get_resource: download_k3s_binary}
         - config: {get_resource: configure_k3s_master}
         - config: {get_resource: configure_rsync_master}
+        - config: {get_resource: taint_k3s_master}
 
   disable_selinux:
     type: OS::Heat::SoftwareConfig
@@ -80,6 +106,8 @@ resources:
           params:
             "${K3S_BINARY_URL}": { get_param: k3s_binary_url }
             "${K3S_MASTER_PUBLIC_IP}": { get_attr: [ k3s_master_floatingip, floating_ip_address] }
+            "${DISABLE_MASTER_AGENT}": { get_param: disable_master_agent }
+            "${PODS_NETWORK_CIDR}": { get_param: pods_network_cidr }
             "${NODE_TOKEN_SHARE_USER}": { get_param: node_token_share_user }
             "${NODE_TOKEN_SHARE_SECRET}": { get_param: node_token_share_secret }
           template: { get_file: write_heat_params_master.sh }
@@ -101,6 +129,12 @@ resources:
     properties:
       group: ungrouped
       config: { get_file: configure_rsync_master.sh }
+
+  taint_k3s_master:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: { get_file: taint_k3s_master.sh }
 
 outputs:
   master_private_ip:

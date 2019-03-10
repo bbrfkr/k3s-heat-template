@@ -47,7 +47,7 @@ parameters:
   k3s_binary_url:
     type: string
     description: url to download k3s binary
-    default: "https://github.com/rancher/k3s/releases/download/v0.1.0/k3s"
+    default: "https://github.com/rancher/k3s/releases/download/v0.2.0/k3s"
   node_token_share_user:
     type: string
     description: username of rsync user to share node token

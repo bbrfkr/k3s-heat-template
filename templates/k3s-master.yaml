@@ -18,6 +18,10 @@ parameters:
     type: string
   pods_network_cidr:
     type: string
+  service_network_cidr:
+    type: string
+  cluster_dns_ip:
+    type: string
   disable_master_agent:
     type: boolean
   k3s_binary_url:
@@ -95,6 +99,8 @@ resources:
             "${K3S_MASTER_PUBLIC_IP}": { get_attr: [ k3s_master_floatingip, floating_ip_address] }
             "${DISABLE_MASTER_AGENT}": { get_param: disable_master_agent }
             "${PODS_NETWORK_CIDR}": { get_param: pods_network_cidr }
+            "${SERVICE_NETWORK_CIDR}": { get_param: service_network_cidr }
+            "${CLUSTER_DNS_IP}": { get_param: cluster_dns_ip }
             "${NODE_TOKEN_SHARE_USER}": { get_param: node_token_share_user }
             "${NODE_TOKEN_SHARE_SECRET}": { get_param: node_token_share_secret }
           template: { get_file: write_heat_params_master.sh }

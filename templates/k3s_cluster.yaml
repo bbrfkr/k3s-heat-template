@@ -40,6 +40,14 @@ parameters:
     type: string
     description: network cidr for pods network
     default: "10.42.0.0/16"
+  service_network_cidr:
+    type: string
+    description: cidr to create cluster ip
+    default: "10.43.0.0/16"
+  cluster_dns_ip:
+    type: string
+    description: ip for cluster dns
+    default: "10.43.0.10"
   disable_master_agent:
     type: boolean
     description: disable agent on master node 
@@ -112,6 +120,8 @@ resources:
           worker_image: { get_param: worker_image }
           worker_flavor: { get_param: worker_flavor }
           pods_network_cidr: { get_param: pods_network_cidr }
+          service_network_cidr: { get_param: service_network_cidr }
+          cluster_dns_ip: { get_param: cluster_dns_ip }
           k3s_binary_url: { get_param: k3s_binary_url }
           node_token_share_user: { get_param: node_token_share_user }
           node_token_share_secret: { get_param: node_token_share_secret }

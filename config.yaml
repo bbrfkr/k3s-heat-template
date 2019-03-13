@@ -1,36 +1,42 @@
 parameters:
   # number of k3s nodes (default: 1)
-  worker_count: 5
+  worker_count:
 
   # keypair for instances belongs to k3s cluster
-  keypair: develop-key
+  keypair: <keypair name>
 
   # external network name to get floating ip
-  external_network: inside_provider
+  external_network: <external network name>
 
   # private network id for k3s cluster (if not specify, autocreated)
-  private_network: inside
+  private_network:
 
   # private subnet id for k3s cluster (if not specify, autocreated)
-  private_subnet: inside
+  private_subnet:
 
   # private subnet cidr for k3s cluster (default: 10.0.0.0/24)
   private_subnet_cidr:
 
   # image name for k3s server
-  master_image: centos7
+  master_image: <image name for master>
 
   # flavor name for k3s server
-  master_flavor: g1.small
+  master_flavor: <flavor name for master>
 
   # image name for k3s nodes
-  worker_image: centos7
+  worker_image: <image name for worker>
 
   # flavor name for k3s nodes
-  worker_flavor: g1.small
+  worker_flavor: <flavor name for worker>
 
   # network cidr for pods network (default: 10.42.0.0/16)
   pods_network_cidr:
+
+  # cidr to create cluster ip (default: 10.43.0.0/16)
+  service_network_cidr:
+
+  # ip for cluster dns (default: 10.43.0.10)
+  cluster_dns_ip:
 
   # disable agent on master node (default: no)
   disable_master_agent:
